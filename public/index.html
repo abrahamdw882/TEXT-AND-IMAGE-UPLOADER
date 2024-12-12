@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Text and Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+        }
+        textarea, input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .preview {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        #successMessage {
+            color: green;
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+        }
+        .payment-info {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .payment-info span {
+            color: #007bff; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Text and Image</h1>
+
+    
+    <div class="payment-info">
+        <p>MAKE PAYMENT TO THIS NUMBER:</p>
+        <p><span>0533763772</span></p>
+        <p>AFTER MAKING PAYMENT, SEND THE NECESSARY INFORMATION BELOW.</p>
+    </div>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="textInput">Enter Text:</label>
+        <textarea id="textInput" name="text" rows="4" required></textarea>
+
+        <label for="transactionId">Enter Transaction ID (11 digits):</label>
+        <input type="text" id="transactionId" name="number" pattern="\d{11}" maxlength="11" required title="Transaction ID must be 11 digits">
+
+        <label for="imageInput">Upload Image:</label>
+        <input type="file" id="imageInput" name="image" accept="image/*" required>
+
+        <button type="submit">Upload</button>
+    </form>
+
+    <div class="preview" id="preview">
+        <h2>Preview</h2>
+        <p id="previewText"></p>
+        <p id="previewNumber"></p> 
+        <img id="previewImage" src="" alt="Image Preview" style="display: none;">
+    </div>
+
+    <div id="successMessage">Uploaded successfully :)</div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const previewText = document.getElementById('previewText');
+        const previewNumber = document.getElementById('previewNumber');
+        const previewImage = document.getElementById('previewImage');
+        const successMessage = document.getElementById('successMessage');
+        const transactionIdInput = document.getElementById('transactionId');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            
+            if (!transactionIdInput.value.match(/^\d{11}$/)) {
+                alert("Transaction ID must be 11 digits.");
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    previewText.textContent = result.data.text;
+                    previewNumber.textContent = result.data.number;
+                    previewImage.src = result.data.imageUrl;
+                    previewImage.style.display = 'block';
+
+                    successMessage.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = '/next-page';
+                    }, 3000);
+                } else {
+                    alert(result.message || 'An error occurred.');
+                }
+            } catch (error) {
+                console.error('Error uploading:', error);
+                alert('Error uploading the file.');
+            }
+        });
+    </script>
+</body>
+</html>
