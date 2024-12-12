@@ -43,12 +43,18 @@
         .payment-info span {
             color: #007bff; 
         }
+        .loading {
+            display: none;
+            font-size: 18px;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
     <h1>Upload Text and Image</h1>
 
-    
     <div class="payment-info">
         <p>MAKE PAYMENT TO THIS NUMBER:</p>
         <p><span>0533763772</span></p>
@@ -77,6 +83,8 @@
 
     <div id="successMessage">Uploaded successfully :)</div>
 
+    <div class="loading" id="loadingMessage">Uploading...</div> 
+
     <script>
         const form = document.getElementById('uploadForm');
         const previewText = document.getElementById('previewText');
@@ -84,17 +92,20 @@
         const previewImage = document.getElementById('previewImage');
         const successMessage = document.getElementById('successMessage');
         const transactionIdInput = document.getElementById('transactionId');
+        const loadingMessage = document.getElementById('loadingMessage');
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            
             if (!transactionIdInput.value.match(/^\d{11}$/)) {
                 alert("Transaction ID must be 11 digits.");
                 return;
             }
 
             const formData = new FormData(form);
+
+            
+            loadingMessage.style.display = 'block';  
 
             try {
                 const response = await fetch('/upload', {
@@ -110,17 +121,21 @@
                     previewImage.src = result.data.imageUrl;
                     previewImage.style.display = 'block';
 
+                    
+                    loadingMessage.style.display = 'none';  
                     successMessage.style.display = 'block';
 
                     setTimeout(() => {
-                        window.location.href = '/next-page';
-                    }, 3000);
+                        window.location.href = '/next-page'; 
+                    }, 7000);
                 } else {
                     alert(result.message || 'An error occurred.');
+                    loadingMessage.style.display = 'none'; 
                 }
             } catch (error) {
                 console.error('Error uploading:', error);
                 alert('Error uploading the file.');
+                loadingMessage.style.display = 'none'; 
             }
         });
     </script>
